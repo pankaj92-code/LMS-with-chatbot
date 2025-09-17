@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>College Library</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    /* --- New Chatbot Styles --- */
+    #chatbot-logo { position:fixed; bottom:20px; right:20px; width:60px; height:60px; border-radius:50%; background:#0077cc; color:white; display:flex; justify-content:center; align-items:center; font-size:28px; cursor:pointer; z-index:1000; }
+    #chatbot-box { position:fixed; bottom:90px; right:20px; width:350px; height:500px; background:white; display:none; flex-direction:column; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.3); z-index:1000; }
+    #chatbot-header { background:#0077cc; color:white; padding:10px; display:flex; justify-content:space-between; align-items:center; }
+    #chatbot-header button { background:none; border:none; color:white; font-size:18px; cursor:pointer; }
+    #chatbotMessages { flex:1; padding:10px; overflow-y:auto; }
+    .msg { margin:8px 0; padding:8px 12px; border-radius:10px; max-width:80%; word-wrap: break-word; }
+    .user { background:#0077cc; color:white; margin-left:auto; }
+    .bot { background:#eee; color:black; margin-right:auto; }
+    #chatbotInput { display:flex; border-top:1px solid #ccc; }
+    #userInput { flex:1; padding:10px; border:none; outline:none; }
+    #sendBtn, #voiceBtn { padding:10px; border:none; background:#0077cc; color:white; cursor:pointer; margin-left:2px; border-radius:4px; }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-left">
+      <div class="logo-3d" aria-label="Library Logo" title="Library Logo">📚</div>
+      <span class="brand">College Library</span>
+    </div>
+    <nav class="nav-right">
+      <a href="#hero">Home</a>
+      <a href="#features">Feature</a>
+      <a href="#catalogue">Catalogue</a>
+      <a href="admin.html">Admin Panel</a>
+      <button class="btn ghost" id="openAuth">Register / Login</button>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section id="hero" class="hero">
+    <canvas id="bg-canvas" aria-hidden="true"></canvas>
+    <div class="hero-content">
+      <h1>Welcome to the <span>Smart Library</span></h1>
+      <p>Fully automated, fast search, voice-enabled chatbot, and clean reports.</p>
+      <button class="btn primary" id="exploreBtn">Explore Library</button>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features" class="section">
+    <h2 class="section-title">Features</h2>
+    <div class="grid features-grid">
+      <!-- Books -->
+      <div class="card feature" data-tab="books">
+        <h3>Books</h3>
+        <p>Search by Title or ISBN. Filter by Branch.</p>
+        <input id="bookQuery" class="input" placeholder="Title or ISBN"/>
+        <select id="bookBranch" class="input">
+          <option value="">All Branches</option>
+          <option>CS</option>
+          <option>BCA</option>
+          <option>MCA</option>
+          <option>Others</option>
+        </select>
+        <button class="btn" id="searchBooks">Search</button>
+        <div id="bookResult" class="scroll-area"></div>
+      </div>
+
+      <!-- Members -->
+      <div class="card feature" data-tab="members">
+        <h3>Members</h3>
+        <p>Find a student by ID and view current holdings & total issues.</p>
+        <input id="memberId" class="input" placeholder="Student Roll / Member ID"/>
+        <button class="btn" id="searchMember">Search</button>
+        <div id="memberResult" class="scroll-area"></div>
+      </div>
+
+      <!-- Borrow -->
+      <div class="card feature" data-tab="borrow">
+        <h3>Borrow</h3>
+        <p>Track issues, due dates (30 days), returns, and fines (₹5/day after due).</p>
+        <input id="borrowMemberId" class="input" placeholder="Student ID"/>
+        <button class="btn" id="searchBorrow">Lookup</button>
+        <div id="borrowResult" class="scroll-area"></div>
+      </div>
+
+      <!-- Report -->
+      <div class="card feature" data-tab="report">
+        <h3>Report</h3>
+        <p>Generate full student history and print/export.</p>
+        <input id="reportMemberId" class="input" placeholder="Student ID"/>
+        <button class="btn" id="searchReport">Generate</button>
+        <div id="reportResult" class="scroll-area print-area"></div>
+        <div class="row mt-2">
+          <button class="btn" id="printReport">Print / Save as PDF</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Catalogue -->
+  <section id="catalogue" class="section">
+    <h2 class="section-title">Catalogue Preview</h2>
+    <div class="table-wrap">
+      <table id="catalogueTable">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>ISBN</th>
+            <th>Category</th>
+            <th>Branch</th>
+            <th>Copies</th>
+          </tr>
+        </thead>
+        <tbody id="catalogueBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Feedback -->
+  <section id="feedback" class="section">
+    <h2 class="section-title">Feedback</h2>
+    <form id="feedbackForm" class="grid form-grid">
+      <input name="name" class="input" placeholder="Name" required/>
+      <input name="email" type="email" class="input" placeholder="Email" required/>
+      <input name="branch" class="input" placeholder="Branch"/>
+      <textarea name="feedback" class="input" placeholder="Your feedback..." required></textarea>
+      <button class="btn primary" type="submit">Submit</button>
+    </form>
+    <div id="feedbackMsg" class="muted"></div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div>
+      <h4>Contact</h4>
+      <p>📍 Vikrant University Gwalior </p>
+      <p>📞 +91-8349737671</p>
+      <p>✉️ library@Vikrant.edu</p>
+      <p>🕘 Mon–Sat 9:30–4:00</p>
+    </div>
+    <div class="muted">© <span id="year"></span> Vikrant University Library. All rights reserved.</div>
+  </footer>
+
+     <!-- Auth Modal -->
+  <dialog id="authModal" class="modal">
+    <div class="modal-content">
+      <button class="close" id="closeAuth">×</button>
+      <h3>Register / Login</h3>
+      <div class="tabs">
+        <button class="tab active" data-pane="studentReg">Student Register</button>
+        <button class="tab" data-pane="studentLogin">Student Login</button>
+        <button class="tab" data-pane="adminReg">Admin Register</button>
+        <button class="tab" data-pane="adminLogin">Admin Login</button>
+      </div>
+
+      <div id="studentReg" class="pane active">
+        <form id="studentRegisterForm" class="grid form-grid">
+          <input name="name" class="input" placeholder="Name" required/>
+          <input name="email" type="email" class="input" placeholder="Email" required/>
+          <input name="roll_number" class="input" placeholder="Student Roll Number" required/>
+          <input name="course" class="input" placeholder="Course" required/>
+          <input name="branch" class="input" placeholder="Branch" required/>
+          <input name="mobile" class="input" placeholder="Mobile Number" required/>
+          <input name="password" type="password" class="input" placeholder="Password" required/>
+          <input name="dob" type="date" class="input" placeholder="Date of Birth" required/>
+          <textarea name="address" class="input" placeholder="Address" required></textarea>
+          <button class="btn primary" type="submit">Register</button>
+        </form>
+        <div id="studentRegMsg" class="muted"></div>
+      </div>
+
+      <div id="studentLogin" class="pane">
+        <form id="studentLoginForm" class="grid form-grid">
+          <input name="roll_number" class="input" placeholder="Student Roll Number" required/>
+          <input name="password" type="password" class="input" placeholder="Password" required/>
+          <button class="btn primary" type="submit">Login</button>
+        </form>
+        <div id="studentLoginMsg" class="muted"></div>
+      </div>
+
+      <div id="adminReg" class="pane">
+        <form id="adminRegisterForm" class="grid form-grid">
+          <input name="name" class="input" placeholder="Name" required/>
+          <input name="user_id" class="input" placeholder="User ID" required/>
+          <input name="email" type="email" class="input" placeholder="Email" required/>
+          <input name="password" type="password" class="input" placeholder="Create Password" required/>
+          <button class="btn primary" type="submit">Register</button>
+        </form>
+        <div id="adminRegMsg" class="muted"></div>
+      </div>
+
+      <div id="adminLogin" class="pane">
+        <form id="adminLoginForm" class="grid form-grid">
+          <input name="user_id" class="input" placeholder="User ID" required/>
+          <input name="password" type="password" class="input" placeholder="Password" required/>
+          <button class="btn primary" type="submit">Login</button>
+        </form>
+        <div id="adminLoginMsg" class="muted"></div>
+      </div>
+    </div>
+  </dialog>
+  <!-- 🔹 New Chatbot -->
+  <div id="chatbot-logo">🤖</div>
+  <div id="chatbot-box">
+    <div id="chatbot-header">
+      <span>Library Chatbot</span>
+      <button id="closeBtn">✖</button>
+    </div>
+    <div id="chatbotMessages"></div>
+    <div id="chatbotInput">
+      <input type="text" id="userInput" placeholder="Type a message...">
+      <button id="sendBtn">➤</button>
+      <button id="voiceBtn">🎤</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <link rel="stylesheet" href="chatbot.css">
